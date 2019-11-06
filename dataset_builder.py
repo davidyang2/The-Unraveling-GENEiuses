@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas
 import random
+import math
 
 def enumerate_feature(feature_list):
     feature_options = set(feature_list)
@@ -44,6 +45,8 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
         header = "SNP\tCONTEXT\tINTERGENIC\tIS_RISK_FACTOR\n"
         out_file.write(header)
         for i in range(pos_train_size):
+            if (math.isnan(intergenic_info[i])):
+                continue
             #print(snps[i]) # possible formats for our snps is 's', 's; s; s;', 's x s'
             out_file.write(snps[i] + "\t" + str(context_option_num[contexts[i]]) + "\t" + str(intergenic_info[i]) + "\t" + "1\n")
 
@@ -57,12 +60,16 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     snps = list(file.SNPS[indices].values)
     contexts = list(file.CONTEXT[indices].values)
     intergenic_info = list(file.INTERGENIC[indices].values)
-    context_option_num = enumerate_feature(contexts)
     mapped_genes = list(file.MAPPED_GENE[indices].values)
+
+    context_option_num = enumerate_feature(contexts)
+    intergenic_option_num = enumerate(intergenic_info)
 
     with open(output_file_name, "a") as out_file:
         counter = 0
         for i in range(neg_train_size * 2):
+            if (math.isnan(intergenic_info[i])):
+                continue
             #print(snps[i]) # possible formats for our snps is 's', 's; s; s;', 's x s'
             if (counter >= neg_train_size):
                 break
