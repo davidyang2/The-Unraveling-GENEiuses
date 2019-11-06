@@ -3,6 +3,7 @@ import numpy as np
 import pandas
 import random
 import math
+import sys
 
 def enumerate_feature(feature_list):
     feature_options = set(feature_list)
@@ -21,7 +22,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     # ------- build positive dataset --------
 
     #location = input('Enter full path of datafile with associated SNPs: ')
-    loc = "/Users/kavya/JHU/comp_bio/project/gwas-association-downloaded_2019-11-05-EFO_0001360-withChildTraits.tsv"
+    loc = sys.argv[1]
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r')
     total_snp_associations = len(file)
 
@@ -52,7 +53,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
     # ------- build negative dataset -------
 
-    loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
+    loc = sys.argv[2]
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
     total_snp_associations = len(file)
     
@@ -80,6 +81,6 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
 
 def main():
-    disease = "type2_diabetes"
+    disease = sys.argv[3]
     create_dataset(disease)
 if __name__ == "__main__": main()
