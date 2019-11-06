@@ -47,8 +47,30 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
             #print(snps[i]) # possible formats for our snps is 's', 's; s; s;', 's x s'
             out_file.write(snps[i] + "\t" + str(context_option_num[contexts[i]]) + "\t" + str(intergenic_info[i]) + "\t" + "1\n")
 
-
     # ------- build negative dataset -------
+
+    loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
+    file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
+    total_snp_associations = len(file)
+    
+    indices = random.sample(range(total_snp_associations), neg_train_size * 2)
+    snps = list(file.SNPS[indices].values)
+    contexts = list(file.CONTEXT[indices].values)
+    intergenic_info = list(file.INTERGENIC[indices].values)
+    context_option_num = enumerate_feature(contexts)
+    mapped_genes = list(file.MAPPED_GENE[indices].values)
+
+    with open(output_file_name, "a") as out_file:
+        counter = 0
+        for i in range(neg_train_size * 2):
+            #print(snps[i]) # possible formats for our snps is 's', 's; s; s;', 's x s'
+            if (counter >= neg_train_size):
+                break
+            if (mapped_genes[i] in positive_genes):
+                continue
+            out_file.write(snps[i] + "\t" + str(context_option_num[contexts[i]]) + "\t" + str(intergenic_info[i]) + "\t" + "0\n")
+            counter = counter + 1
+
 
 def main():
     disease = "type2_diabetes"
