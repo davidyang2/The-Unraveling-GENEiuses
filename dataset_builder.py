@@ -5,6 +5,9 @@ import random
 import math
 import sys
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 def enumerate_feature(feature_list, feature_option_num):
     feature_options = set(feature_list)
     counter = 0
@@ -15,6 +18,41 @@ def enumerate_feature(feature_list, feature_option_num):
             feature_option_num[c] = counter
             counter = counter + 1
     return feature_option_num
+
+def get_feature_counts_for_plotting(feature_list, feature_option_num):
+    counts = {}
+    for f in feature_list:
+        f_num = feature_option_num[f]
+        if f_num in counts:
+            counts[f_num] = counts[f_num] + 1
+        else:
+            counts[f_num] = 0
+    return counts
+
+def plot_feature(positive_counts, negative_counts, feature_type):
+    width = 0.35
+    fig, ax = plt.subplots()
+    ax.bar(positive_counts.keys(), positive_counts.values(), color='g')
+    ind = max(len(positive_counts), len(negative_counts))
+    ind = np.arange(ind)
+
+    #pp = PdfPages(feature_type + "_histograms.pdf")
+    #ax = plt.gca()
+    #ax.set_xlim(0, 18)
+    #pos_context_fig = plt.figure(1)
+    pos_context_fig = ax.bar(positive_counts.keys(), positive_counts.values(), color='g')
+    #pp.savefig(pos_context_fig, dpi = 300, transparent=True)
+
+    #neg_context_fig = plt.figure(2)
+    neg_context_fig = ax.bar(negative_counts.keys() + width, negative_counts.values(), color='r')
+    #pp.savefig(neg_context_fig, dpi=300, transparent=True)
+    #pp.close()
+
+    ax.set_ylabel('Count')
+    ax.set_xlabel('Type')
+
+    fig.savefig(feature_type + "_histograms.pdf")
+
 
 def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
@@ -39,11 +77,12 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     intergenic_info = list(file.INTERGENIC[indices].values)
 
     context_option_num = enumerate_feature(contexts, {})
+    positive_context_counts = get_feature_counts_for_plotting(contexts, context_option_num)
     #intergenic_info = enumerate(intergenic_info)
 
-    print("POSITIVE")
-    for i in context_option_num:
-        print(str(i) + " " + str(context_option_num[i]))
+    #print("POSITIVE")
+    #for i in context_option_num:
+        #print(str(i) + " " + str(context_option_num[i]))
 
     positive_genes = set(file.MAPPED_GENE[indices].values)
     output_file_name = os.path.join(os.path.split(loc)[0], disease + '.tsv')
@@ -71,10 +110,13 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
     context_option_num = enumerate_feature(contexts, context_option_num)
     intergenic_option_num = enumerate_feature(intergenic_info, {})
+    negative_context_counts = get_feature_counts_for_plotting(contexts, context_option_num)
 
-    print("\n\n\nNEGATIVE")
-    for i in context_option_num:
-        print(str(i) + " " + str(context_option_num[i]))
+    plot_feature(positive_context_counts, negative_context_counts, "Context")
+
+    #print("\n\n\nNEGATIVE")
+    #for i in context_option_num:
+        #print(str(i) + " " + str(context_option_num[i]))
 
     with open(output_file_name, "a") as out_file:
         counter = 0
