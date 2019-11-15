@@ -32,7 +32,6 @@ def get_feature_counts_for_plotting(feature_list, feature_option_num):
 def plot_feature(positive_counts, negative_counts, feature_type):
     width = 0.35
     fig, ax = plt.subplots()
-    ax.bar(positive_counts.keys(), positive_counts.values(), color='g')
     ind = max(len(positive_counts), len(negative_counts))
     ind = np.arange(ind)
 
@@ -40,11 +39,13 @@ def plot_feature(positive_counts, negative_counts, feature_type):
     #ax = plt.gca()
     #ax.set_xlim(0, 18)
     #pos_context_fig = plt.figure(1)
-    pos_context_fig = ax.bar(positive_counts.keys(), positive_counts.values(), color='g')
+    ind = np.fromiter(positive_counts.keys(), dtype=float)
+    pos_context_fig = ax.bar(ind, positive_counts.values(), width, color='g')
     #pp.savefig(pos_context_fig, dpi = 300, transparent=True)
 
     #neg_context_fig = plt.figure(2)
-    neg_context_fig = ax.bar(negative_counts.keys() + width, negative_counts.values(), color='r')
+    ind = np.fromiter(negative_counts.keys(), dtype=float)
+    neg_context_fig = ax.bar(ind + width, negative_counts.values(), width, color='r')
     #pp.savefig(neg_context_fig, dpi=300, transparent=True)
     #pp.close()
 
@@ -102,7 +103,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
     total_snp_associations = len(file)
     
-    indices = random.sample(range(total_snp_associations), neg_train_size * 2)
+    indices = random.sample(range(total_snp_associations), neg_train_size)
     snps = list(file.SNPS[indices].values)
     contexts = list(file.CONTEXT[indices].values)
     intergenic_info = list(file.INTERGENIC[indices].values)
@@ -120,7 +121,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
     with open(output_file_name, "a") as out_file:
         counter = 0
-        for i in range(neg_train_size * 2):
+        for i in range(neg_train_size):
             if (math.isnan(intergenic_info[i])):
                 continue
             #print(snps[i]) # possible formats for our snps is 's', 's; s; s;', 's x s'
