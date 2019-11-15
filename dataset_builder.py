@@ -5,9 +5,8 @@ import random
 import math
 import sys
 
-def enumerate_feature(feature_list):
+def enumerate_feature(feature_list, feature_option_num):
     feature_options = set(feature_list)
-    feature_option_num = {}
     counter = 0
     for c in feature_options:
         if c in feature_option_num:
@@ -22,7 +21,8 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     # ------- build positive dataset --------
 
     #location = input('Enter full path of datafile with associated SNPs: ')
-    loc = sys.argv[1]
+    #loc = sys.argv[1]
+    loc = "/Users/kavya/JHU/comp_bio/project/gwas-association-downloaded_2019-11-05-EFO_0001360-withChildTraits.tsv"
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r')
     total_snp_associations = len(file)
 
@@ -38,7 +38,12 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     contexts = list(file.CONTEXT[indices].values)
     intergenic_info = list(file.INTERGENIC[indices].values)
 
-    context_option_num = enumerate_feature(contexts)
+    context_option_num = enumerate_feature(contexts, {})
+    #intergenic_info = enumerate(intergenic_info)
+
+    print("POSITIVE")
+    for i in context_option_num:
+        print(str(i) + " " + str(context_option_num[i]))
 
     positive_genes = set(file.MAPPED_GENE[indices].values)
     output_file_name = os.path.join(os.path.split(loc)[0], disease + '.tsv')
@@ -53,7 +58,8 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
     # ------- build negative dataset -------
 
-    loc = sys.argv[2]
+    #loc = sys.argv[2]
+    loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
     total_snp_associations = len(file)
     
@@ -63,8 +69,12 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     intergenic_info = list(file.INTERGENIC[indices].values)
     mapped_genes = list(file.MAPPED_GENE[indices].values)
 
-    context_option_num = enumerate_feature(contexts)
-    intergenic_option_num = enumerate(intergenic_info)
+    context_option_num = enumerate_feature(contexts, context_option_num)
+    intergenic_option_num = enumerate_feature(intergenic_info, {})
+
+    print("\n\n\nNEGATIVE")
+    for i in context_option_num:
+        print(str(i) + " " + str(context_option_num[i]))
 
     with open(output_file_name, "a") as out_file:
         counter = 0
@@ -81,6 +91,6 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
 
 def main():
-    disease = sys.argv[3]
+    disease = "diabetes"
     create_dataset(disease)
 if __name__ == "__main__": main()
