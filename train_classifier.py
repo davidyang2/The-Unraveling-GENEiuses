@@ -15,11 +15,20 @@ my_data = genfromtxt(loc, delimiter='\t')
 #print(my_data[1:-1, -1])
 #my_data = my_data[1:-2, 1:-1]
 np.random.shuffle(my_data)
-X = my_data[1:-1, 1:-2]
-X_train, X_test = np.split(X, 2)
+#print(my_data)
+
+try:
+   X = my_data[1:-1, 1:-2]
+   Y = my_data[1:-1, -1]
+   X_train, X_test = np.split(X, 2)
+   Y_train, Y_test = np.split(Y, 2)
+except ValueError:
+   X = my_data[1:-2, 1:-2]
+   Y = my_data[1:-2, -1]
+   X_train, X_test = np.split(X, 2)
+   Y_train, Y_test = np.split(Y, 2)
+
 print(X_test)
-Y = my_data[1:-1, -1]
-Y_train, Y_test = np.split(Y, 2)
 # this is sketchy
 X_train = remove_nan(X_train)
 Y_train = remove_nan(Y_train)
