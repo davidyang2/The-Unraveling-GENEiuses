@@ -8,19 +8,32 @@ import sys
 import matplotlib.pyplot as plt
 
 import gwas_feature_library
+import gene_ontology_features
 
-def build_positive_dataset(loc, output_file_name, train_size=0):
-    file = pandas.read_csv(loc, sep='\t', lineterminator='\r')
+def select_indices(pos_loc, neg_loc):
+    file = pandas.read_csv(pos_loc, sep='\t', lineterminator='\r')
     total_snp_associations = len(file)
 
-    if train_size == 0:
-        train_size = total_snp_associations
-    pos_train_size = train_size // 2
-    neg_train_size = train_size // 2
+    train_size = total_snp_associations
+    pos_train_size = train_size
+    neg_train_size = train_size
 
     # select snps to be used in training dataset
     random.seed(100)
-    indices = random.sample(range(total_snp_associations), pos_train_size)
+    pos_indices = random.sample(range(total_snp_associations), pos_train_size)
+
+    file = pandas.read_csv(neg_loc, sep='\t', lineterminator='\r', low_memory=False)
+    total_snp_associations = len(file)
+    
+    neg_indices = random.sample(range(total_snp_associations), neg_train_size)
+
+    return pos_indices, neg_indices
+
+
+def build_positive_dataset(loc, indices, output_file_name, train_size=0):
+    file = pandas.read_csv(loc, sep='\t', lineterminator='\r')
+    pos_train_size = len(indices)
+
     snps = list(file.SNPS[indices].values)
     positive_genes = set(file.MAPPED_GENE[indices].values)
 
@@ -71,17 +84,16 @@ def build_positive_dataset(loc, output_file_name, train_size=0):
 
             out_file.write("1\n")
 
-    return pos_train_size, positive_genes, context_option_num, intergenic_option_num, \
-        positive_context_counts, positive_intergenic_counts
+    return positive_genes, context_option_num, intergenic_option_num, positive_context_counts, \
+        positive_intergenic_counts
 
 
-def build_negative_dataset(loc, output_file_name, neg_train_size, positive_genes, \
-    context_option_num, intergenic_option_num, positive_context_counts, positive_intergenic_counts):
+def build_negative_dataset(loc, indices, output_file_name, positive_genes, context_option_num, \
+    intergenic_option_num, positive_context_counts, positive_intergenic_counts):
 
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
-    total_snp_associations = len(file)
-    
-    indices = random.sample(range(total_snp_associations), neg_train_size)
+    neg_train_size = len(indices)
+
     snps = list(file.SNPS[indices].values)
     mapped_genes = list(file.MAPPED_GENE[indices].values)
 
@@ -133,15 +145,19 @@ def build_negative_dataset(loc, output_file_name, neg_train_size, positive_genes
             counter = counter + 1
 
 def create_dataset(disease, train_size=0, test_size=0, val_size=0):
-    loc = "/Users/kavya/JHU/comp_bio/project/gwas-diabetes2-positive.tsv"
-    out_file_name = os.path.join(os.path.split(loc)[0], disease + '.tsv')
+    pos_loc = "/Users/kavya/JHU/comp_bio/project/gwas-diabetes2-positive.tsv"
+    neg_loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
 
-    pos_train_size, pos_genes, context_option_num, intergenic_option_num, positive_context_counts, \
-        positive_intergenic_counts = build_positive_dataset(loc, out_file_name)
+    pos_indices, neg_indices = select_indices(pos_loc, neg_loc)
 
-    neg_train_size = pos_train_size
-    loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
-    build_negative_dataset(loc, out_file_name, neg_train_size, pos_genes, context_option_num, \
+    gene_ontology_features.make_gene_list(disease, pos_loc, neg_loc, pos_indices, neg_indices)
+
+    out_file_name = os.path.join(os.path.split(pos_loc)[0], disease + '.tsv')
+
+    pos_genes, context_option_num, intergenic_option_num, positive_context_counts, \
+        positive_intergenic_counts = build_positive_dataset(pos_loc, pos_indices, out_file_name)
+
+    build_negative_dataset(neg_loc, neg_indices, out_file_name, pos_genes, context_option_num, \
         intergenic_option_num, positive_context_counts, positive_intergenic_counts)
 
 
