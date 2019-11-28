@@ -30,7 +30,7 @@ def select_indices(pos_loc, neg_loc):
     return pos_indices, neg_indices
 
 
-def build_positive_dataset(loc, indices, output_file_name, train_size=0):
+def build_positive_dataset(disease, loc, indices, output_file_name, train_size=0):
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r')
     pos_train_size = len(indices)
 
@@ -48,11 +48,15 @@ def build_positive_dataset(loc, indices, output_file_name, train_size=0):
     positive_intergenic_counts = gwas_feature_library.get_feature_counts_for_plotting(intergenic_info, \
         intergenic_option_num)
 
+    df = pandas.DataFrame(file)
+    reported_genes = df[df.columns[13]]
+    reported_genes = reported_genes[indices].values
+
     with open(output_file_name, "w+") as out_file:
         header = "SNP\tCONTEXT\tINTERGENIC\tCHR_ID\tCHR_POS\tUP_DIST\tDOWN_DIST\t"
 
         # Example code:
-        # header += kavya_features.add_to_header()
+        header += gene_ontology_features.add_to_header()
         # header += david_features.add_to_header()
         # header += richard_features.add_to_header()
 
@@ -68,7 +72,7 @@ def build_positive_dataset(loc, indices, output_file_name, train_size=0):
             try:
                 # Example code
                 features_to_add = ""
-                # features_to_add += kavya_features.add_feature_for_curr_snp(snps[i])
+                features_to_add += gene_ontology_features.add_feature_for_curr_snp(disease, reported_genes[i])
                 # features_to_add += david_features.add_feature_for_curr_snp(snps[i])
                 # features_to_add += richard_features.add_feature_for_curr_snp(snps[i])
             except ValueError:
@@ -80,7 +84,7 @@ def build_positive_dataset(loc, indices, output_file_name, train_size=0):
                     + str(upstream_gene_distance[i]) + "\t" + str(downstream_gene_distance[i]) + "\t")
 
             # Example code:
-            # out_file.write(features_to_add)
+            out_file.write(features_to_add)
 
             out_file.write("1\n")
 
@@ -88,7 +92,7 @@ def build_positive_dataset(loc, indices, output_file_name, train_size=0):
         positive_intergenic_counts
 
 
-def build_negative_dataset(loc, indices, output_file_name, positive_genes, context_option_num, \
+def build_negative_dataset(disease, loc, indices, output_file_name, positive_genes, context_option_num, \
     intergenic_option_num, positive_context_counts, positive_intergenic_counts):
 
     file = pandas.read_csv(loc, sep='\t', lineterminator='\r', low_memory=False)
@@ -111,6 +115,10 @@ def build_negative_dataset(loc, indices, output_file_name, positive_genes, conte
     gwas_feature_library.plot_feature(positive_context_counts, negative_context_counts, "Context")
     gwas_feature_library.plot_feature(positive_intergenic_counts, negative_intergenic_counts, "Intergenic")
 
+    df = pandas.DataFrame(file)
+    reported_genes = df[df.columns[13]]
+    reported_genes = reported_genes[indices].values
+
     with open(output_file_name, "a") as out_file:
         counter = 0
         for i in range(neg_train_size):
@@ -127,7 +135,8 @@ def build_negative_dataset(loc, indices, output_file_name, positive_genes, conte
             try:
                 # Example code
                 features_to_add = ""
-                # features_to_add += kavya_features.add_feature_for_curr_snp(snps[i])
+                features_to_add += gene_ontology_features.add_feature_for_curr_snp(disease, \
+                    reported_genes[i])
                 # features_to_add += david_features.add_feature_for_curr_snp(snps[i])
                 # features_to_add += richard_features.add_feature_for_curr_snp(snps[i])
             except ValueError:
@@ -138,7 +147,7 @@ def build_negative_dataset(loc, indices, output_file_name, positive_genes, conte
                     + str(upstream_gene_distance[i]) + "\t" + str(downstream_gene_distance[i]) + "\t")
 
             # Example code:
-            # out_file.write(features_to_add)
+            out_file.write(features_to_add)
 
             out_file.write("0\n")
 
@@ -155,9 +164,9 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
     out_file_name = os.path.join(os.path.split(pos_loc)[0], disease + '.tsv')
 
     pos_genes, context_option_num, intergenic_option_num, positive_context_counts, \
-        positive_intergenic_counts = build_positive_dataset(pos_loc, pos_indices, out_file_name)
+        positive_intergenic_counts = build_positive_dataset(disease, pos_loc, pos_indices, out_file_name)
 
-    build_negative_dataset(neg_loc, neg_indices, out_file_name, pos_genes, context_option_num, \
+    build_negative_dataset(disease, neg_loc, neg_indices, out_file_name, pos_genes, context_option_num, \
         intergenic_option_num, positive_context_counts, positive_intergenic_counts)
 
 
