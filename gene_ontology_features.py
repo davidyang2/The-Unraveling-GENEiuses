@@ -1,14 +1,19 @@
 import pandas
 import os
+import sys
 
 def add_to_header():
     return "GO FUNCTION\t"
 
 def add_feature_for_curr_snp(disease, curr_gene):
-    #print("Searching for " + str(curr_gene))
+    # print("Searching for " + str(curr_gene))
     cluster_report_loc = ""
+    if disease == "breast_carcinoma":
+        cluster_report_loc = "C:\\Users\\david\\Documents\\Computational Biomedical Research\\breast_carcinoma_functional_cluster.tsv"
     if disease == "diabetes":
-        cluster_report_loc = "/Users/kavya/JHU/comp_bio/project/diabetes_functional_cluster.tsv"
+        # cluster_report_loc = "/Users/kavya/JHU/comp_bio/project/diabetes_functional_cluster.tsv"
+        cluster_report_loc = "C:\\Users\\david\\Documents\\Computational Biomedical Research\\diabetes_functional_cluster.tsv"
+    # if disease == "cardiovascular_disease":
     
     # We will now search the functional cluster tsv file to determine which function cluster the
     # gene belongs to. Note that many genes appear in multiple clusters, so we will pick the cluster
@@ -20,8 +25,8 @@ def add_feature_for_curr_snp(disease, curr_gene):
     with open(cluster_report_loc, 'r') as file:
         read_a_new_cluster = file.readline().rstrip()
         while (read_a_new_cluster):
-            #print("Looking at cluster " + str(cluster_i))
-            #on_same_cluster = True
+            # print("Looking at cluster " + str(cluster_i))
+            # on_same_cluster = True
             table_name = read_a_new_cluster
             table_headers = file.readline().rstrip().split('\t')
 
@@ -31,10 +36,10 @@ def add_feature_for_curr_snp(disease, curr_gene):
                 data_row = on_same_cluster.split('\t')
                 data_genes_row = data_row[5]
                 data_genes_row = data_genes_row.rstrip().split(',')
-                #print(data_genes_row)
+                # print(data_genes_row)
                 for d in data_genes_row:
                     d = d.rstrip().lstrip()
-                    #print(d)
+                    # print(d)
                     if str(d) == curr_gene:
                         found_gene = True
                         break
@@ -47,14 +52,14 @@ def add_feature_for_curr_snp(disease, curr_gene):
                 break
             # if we read another newline / empty line, we have reached EOF
             read_a_new_cluster = file.readline().rstrip()
-            #print(read_a_new_cluster)
+            # print(read_a_new_cluster)
             cluster_i = cluster_i + 1
 
 
     if (not found_gene):
         cluster_i = 0       # return 0 as label if we have not found the gene in any cluster
 
-    #print(str(cluster_i))
+    # print(str(cluster_i))
     return str(cluster_i) + "\t"
 
 def cleanup_single_gene(org_gene):
@@ -75,22 +80,22 @@ def gene_cleanup(genes):
 
 def make_gene_list(disease, pos_loc, neg_loc, pos_indices, neg_indices):
     file = pandas.read_csv(pos_loc, sep='\t', lineterminator='\r')
-    #pos_genes = file.MAPPED_GENE[pos_indices].values
-    #pos_genes = pandas.read_csv(pos_loc, index_col = "MAPPED GENE", sep='\t', lineterminator='\r')
-    df = pandas.DataFrame(file)
-    pos_genes = df[df.columns[13]]
-    pos_genes = pos_genes[pos_indices].values
+    # pos_genes = file.MAPPED_GENE[pos_indices].values
+    # pos_genes = pandas.read_csv(pos_loc, index_col = "MAPPED GENE", sep='\t', lineterminator='\r')
+    df = pandas.DataFrame(file)  # Two-dimensional size-mutable, potentially heterogeneous tabular data structure with labeled axes
+    pos_genes = df[df.columns[13]]  # Selects genes column from the DataFrame
+    pos_genes = pos_genes[pos_indices].values  # Takes only the genes that were randomly selected for our dataset
     pos_genes = gene_cleanup(pos_genes)
 
     file = pandas.read_csv(neg_loc, sep='\t', lineterminator='\r', low_memory=False)
     df = pandas.DataFrame(file)
     neg_genes = df[df.columns[13]]
     neg_genes = neg_genes[neg_indices].values
-    #neg_genes = file.MAPPED_GENE[neg_indices].values
+    # neg_genes = file.MAPPED_GENE[neg_indices].values
     neg_genes = gene_cleanup(neg_genes)
 
     genes = set(pos_genes)
-    genes.update(set(neg_genes))
+    genes.update(set(neg_genes))  # Inserts negative genes into set
 
     out_file_name = os.path.join(os.path.split(pos_loc)[0], disease + '_gene_list.txt')
     with open(out_file_name, "w+") as out_file:
