@@ -156,7 +156,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
 
 def main():
-    disease = "diabetes"
+    disease = "cardiovascular_disease"
     create_dataset(disease)
 
 

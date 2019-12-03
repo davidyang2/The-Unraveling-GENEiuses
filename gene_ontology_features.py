@@ -13,7 +13,8 @@ def add_feature_for_curr_snp(disease, curr_gene):
     if disease == "diabetes":
         # cluster_report_loc = "/Users/kavya/JHU/comp_bio/project/diabetes_functional_cluster.tsv"
         cluster_report_loc = "C:\\Users\\david\\Documents\\Computational Biomedical Research\\diabetes_functional_cluster.tsv"
-    # if disease == "cardiovascular_disease":
+    if disease == "cardiovascular_disease":
+        cluster_report_loc = "C:\\Users\\david\\Documents\\Computational Biomedical Research\\cardiovascular_disease_functional_cluster.tsv"
     
     # We will now search the functional cluster tsv file to determine which function cluster the
     # gene belongs to. Note that many genes appear in multiple clusters, so we will pick the cluster

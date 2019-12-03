@@ -60,7 +60,7 @@ def add_tissue_expression_for_curr_snp(disease, curr_gene):
                 else:
                     return "-1\t"
 
-            if disease == "cardiovascular disease":
+            if disease == "cardiovascular_disease":
                 express_range = express_range.loc[express_range["Tissue"] == "heart muscle"]
 
                 if "High" in express_range["Level"].values:
