@@ -2,13 +2,16 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 from numpy import genfromtxt
 import sys
+from sklearn import svm
 
 def remove_nan(Y_test):
    nanIndex = np.argwhere(np.isnan(Y_test))
    Y_test[nanIndex] = 0
    return Y_test
 
-loc = "/Users/kavya/JHU/comp_bio/project/diabetes.tsv"
+#loc = "/Users/kavya/JHU/comp_bio/project/diabetes.tsv"
+loc = "/Users/kavya/JHU/comp_bio/project/breast_carcinomaTEMP_2.tsv"
+#loc = "/Users/kavya/JHU/comp_bio/project/cardiovascular_disease.tsv"
 #loc = sys.argv[1]
 
 my_data = genfromtxt(loc, delimiter='\t')
@@ -39,4 +42,9 @@ print(Y_test)
 classifier = RandomForestClassifier(n_estimators=10)
 classifier = classifier.fit(X_train, Y_train)
 
-print("OUR ACCURACY: " + str(classifier.score(X_test, Y_test)))
+print("RF ACCURACY: " + str(classifier.score(X_test, Y_test)))
+
+classifier2 = svm.SVC()
+classifier2 = classifier2.fit(X_train, Y_train)
+
+print("SVM ACCURACY: " + str(classifier2.score(X_test, Y_test)))
