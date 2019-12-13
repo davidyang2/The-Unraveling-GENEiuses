@@ -27,8 +27,19 @@ def plot_features(loc):
          split_point = i
          break
 
-   print(len(is_risk_factor))
-   print(split_point)
+   pos_total = split_point
+   neg_total = len(is_risk_factor) - split_point
+
+   neg_end = len(is_risk_factor)
+   pos_end = split_point
+
+   if (pos_total < neg_total):
+      neg_end = split_point + pos_total
+   elif (pos_total > neg_total):
+      pos_end = neg_total
+
+   #print(len(is_risk_factor))
+   #print(split_point)
 
    for i in range(len(features_to_plot)):
       feature_name = features_to_plot[i]
@@ -36,8 +47,10 @@ def plot_features(loc):
       print("Plotting " + str(feature_name))
 
       # get positive and negative features
-      pos_features = feature[0:split_point]
-      neg_features = feature[split_point:]
+      pos_features = feature[0:pos_end]
+      neg_features = feature[split_point:neg_end]
+      #pos_features = feature[0:split_point]
+      #neg_features = feature[split_point:]
 
       # continuous features
       if feature_name == "UP_DIST" or feature_name == "DOWN_DIST" or feature_name == "CHR_POS":
@@ -55,15 +68,22 @@ def plot_features(loc):
          pos_counts = gwas_feature_library.get_feature_counts_for_plotting(pos_features)
          neg_counts = gwas_feature_library.get_feature_counts_for_plotting(neg_features)
          gwas_feature_library.plot_feature(pos_counts, neg_counts, feature_name)
+      
+   return pos_end, split_point, neg_end
 
-#loc = "/Users/kavya/JHU/comp_bio/project/The-Unraveling-GENEiuses/diabetes.tsv"
-loc = "/Users/kavya/JHU/comp_bio/project/The-Unraveling-GENEiuses/breast_carcinomaTEMP.tsv"
+loc = "/Users/kavya/JHU/comp_bio/project/The-Unraveling-GENEiuses/diabetes.tsv"
+#loc = "/Users/kavya/JHU/comp_bio/project/The-Unraveling-GENEiuses/breast_carcinomaTEMP.tsv"
 #loc = "/Users/kavya/JHU/comp_bio/project/The-Unraveling-GENEiuses/cardiovascular_disease.tsv"
 #loc = sys.argv[1]
 
-plot_features(loc)
+pos_end, split_point, neg_end = plot_features(loc)
 
 my_data = genfromtxt(loc, delimiter='\t')
+print(my_data.shape)
+pos_data = my_data[0:pos_end]
+neg_data = my_data[split_point:neg_end]
+my_data = np.concatenate((pos_data, neg_data), axis=0)
+print(my_data.shape)
 #print(my_data[1:-1, -1])
 #my_data = my_data[1:-2, 1:-1]
 np.random.shuffle(my_data)
@@ -80,13 +100,13 @@ except ValueError:
    X_train, X_test = np.split(X, 2)
    Y_train, Y_test = np.split(Y, 2)
 
-print(X_test)
+#print(X_test)
 # this is sketchy
 X_train = remove_nan(X_train)
 Y_train = remove_nan(Y_train)
 X_test = remove_nan(X_test)
 Y_test = remove_nan(Y_test)
-print(Y_test)
+#print(Y_test)
 
 classifier = RandomForestClassifier(n_estimators=10)
 classifier = classifier.fit(X_train, Y_train)
