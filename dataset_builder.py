@@ -149,8 +149,11 @@ def build_negative_dataset(disease, loc, indices, output_file_name, positive_gen
 
 
 def create_dataset(disease, train_size=0, test_size=0, val_size=0):
-    pos_loc = sys.argv[1]  # C:\Users\david\Documents\Computational Biomedical Research\gwas-association-downloaded_2019-11-06-EFO_0000305-withChildTraits.tsv
-    neg_loc = sys.argv[2]  # C:\Users\david\Documents\Computational Biomedical Research\gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv
+    #pos_loc = sys.argv[1]  # C:\Users\david\Documents\Computational Biomedical Research\gwas-association-downloaded_2019-11-06-EFO_0000305-withChildTraits.tsv
+    #neg_loc = sys.argv[2]  # C:\Users\david\Documents\Computational Biomedical Research\gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv
+
+    pos_loc = "/Users/kavya/JHU/comp_bio/project/gwas-diabetes2-positive.tsv"
+    neg_loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
 
     pos_indices, neg_indices = select_indices(pos_loc, neg_loc)  # Gets rows for genes of interest in positive and negative dataset
 

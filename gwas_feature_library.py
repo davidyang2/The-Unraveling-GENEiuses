@@ -15,10 +15,13 @@ def enumerate_feature(feature_list, feature_option_num):
     return feature_option_num
 
 
-def get_feature_counts_for_plotting(feature_list, feature_option_num):
+def get_feature_counts_for_plotting(feature_list, feature_option_num={}):
     counts = {}
     for f in feature_list:
-        f_num = feature_option_num[f]
+        if feature_option_num == {}:
+            f_num = f
+        else:
+            f_num = feature_option_num[f]
         if f_num in counts:
             counts[f_num] = counts[f_num] + 1
         else:
@@ -29,8 +32,15 @@ def get_feature_counts_for_plotting(feature_list, feature_option_num):
 def plot_feature(positive_counts, negative_counts, feature_type):
     width = 0.35
     fig, ax = plt.subplots()
+    lower_range = min(min(positive_counts), min(negative_counts))
+    upper_range = max(max(positive_counts), max(negative_counts))
     ind = max(len(positive_counts), len(negative_counts))
-    ax.set_xlim(-1, 2)
+    #print(ind)
+
+    if feature_type == "GO FUNCTION":
+        ax.set_xlim(-1, ind+1)
+    else:
+        ax.set_xlim(lower_range - 1, upper_range + 1)
 
     # pp = PdfPages(feature_type + "_histograms.pdf")
     # ax = plt.gca()
@@ -84,6 +94,10 @@ def enumerate_gwas_features(contexts, intergenic_info, context_option_num={}, in
     context_option_num = enumerate_feature(contexts, context_option_num)
     intergenic_option_num = enumerate_feature(intergenic_info, intergenic_option_num)
     return context_option_num, intergenic_option_num
+
+def enumerate_a_feature(feature, feature_option_num={}):
+    feature_option_num = enumerate_feature(contexts, context_option_num)
+    return feature_option_num
 
 
 def get_gwas_features(file, indices):
