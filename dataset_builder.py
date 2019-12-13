@@ -74,7 +74,6 @@ def build_positive_dataset(disease, loc, indices, output_file_name, train_size=0
                     features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, mapped_genes[i])
                 else:
                     features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, reported_genes[i])
-                print(features_to_add)
             except ValueError:
                 continue
 
@@ -149,11 +148,11 @@ def build_negative_dataset(disease, loc, indices, output_file_name, positive_gen
 
 
 def create_dataset(disease, train_size=0, test_size=0, val_size=0):
-    #pos_loc = sys.argv[1]  # C:\Users\david\Documents\Computational Biomedical Research\gwas-association-downloaded_2019-11-06-EFO_0000305-withChildTraits.tsv
-    #neg_loc = sys.argv[2]  # C:\Users\david\Documents\Computational Biomedical Research\gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv
+    pos_loc = sys.argv[1]  # C:\Users\david\Documents\Computational Biomedical Research\gwas-association-downloaded_2019-11-06-EFO_0000305-withChildTraits.tsv
+    neg_loc = sys.argv[2]  # C:\Users\david\Documents\Computational Biomedical Research\gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv
 
-    pos_loc = "/Users/kavya/JHU/comp_bio/project/gwas-diabetes2-positive.tsv"
-    neg_loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
+    # pos_loc = "/Users/kavya/JHU/comp_bio/project/gwas-diabetes2-positive.tsv"
+    # neg_loc = "/Users/kavya/JHU/comp_bio/project/gwas_catalog_v1.0-associations_e96_r2019-10-14.tsv"
 
     pos_indices, neg_indices = select_indices(pos_loc, neg_loc)  # Gets rows for genes of interest in positive and negative dataset
 
@@ -167,7 +166,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
 
 def main():
-    disease = "cardiovascular_disease"  # Change this depending on what disease you are analyzing
+    disease = "diabetes"  # Change this depending on what disease you are analyzing
     create_dataset(disease)
 
 
