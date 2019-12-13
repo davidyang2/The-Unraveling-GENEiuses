@@ -2,8 +2,10 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 from numpy import genfromtxt
 import sys
+
 from sklearn import svm
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import plot_confusion_matrix
 
 import gwas_feature_library
 import matplotlib.pyplot as plt
@@ -108,13 +110,24 @@ X_test = remove_nan(X_test)
 Y_test = remove_nan(Y_test)
 #print(Y_test)
 
+#np.set_printoptions(precision=2)
+
 classifier = RandomForestClassifier(n_estimators=10)
 classifier = classifier.fit(X_train, Y_train)
-
 print("RF ACCURACY: " + str(classifier.score(X_test, Y_test)))
+#fig, ax = plt.subplots()
+disp = plot_confusion_matrix(classifier, X_test, Y_test, cmap=plt.cm.Blues, normalize=None)
+disp.ax_.set_title("Confusion Matrix")
+print(disp.confusion_matrix)
+#fig.savefig('rf_matrix.pdf')
 
 classifier2 = svm.SVC()
 classifier2 = classifier2.fit(X_train, Y_train)
+disp = plot_confusion_matrix(classifier, X_test, Y_test)
+disp.ax_.set_title("Confusion Matrix")
+print(disp.confusion_matrix)
+
+plt.show()
 
 print("SVM ACCURACY: " + str(classifier2.score(X_test, Y_test)))
 
