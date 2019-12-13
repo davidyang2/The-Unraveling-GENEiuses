@@ -56,7 +56,7 @@ def build_positive_dataset(disease, loc, indices, output_file_name, train_size=0
 
         # Example code:
         header += gene_ontology_features.add_to_header()
-        header += gene_tissue_expression.add_to_header()
+        header += gene_tissue_expression.add_to_header(disease)
         # header += richard_features.add_to_header()
 
         header += "IS_RISK_FACTOR\n"
@@ -69,8 +69,12 @@ def build_positive_dataset(disease, loc, indices, output_file_name, train_size=0
             try:
                 # Example code
                 features_to_add = ""
-                features_to_add += gene_ontology_features.add_feature_for_curr_snp(disease, reported_genes[i])
-                features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, reported_genes[i])
+                # features_to_add += gene_ontology_features.add_feature_for_curr_snp(disease, reported_genes[i])
+                if disease == "cardiovascular_disease":
+                    features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, mapped_genes[i])
+                else:
+                    features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, reported_genes[i])
+                print(features_to_add)
             except ValueError:
                 continue
 
@@ -92,7 +96,7 @@ def build_negative_dataset(disease, loc, indices, output_file_name, positive_gen
     neg_train_size = len(indices)
 
     snps = list(file.SNPS[indices].values)
-    mapped_genes = list(file.MAPPED_GENE[indices].values)
+    # mapped_genes = list(file.MAPPED_GENE[indices].values)
 
     contexts, intergenic_info, chromosome_ids, chr_pos, upstream_gene_distance, downstream_gene_distance = gwas_feature_library.get_gwas_features(file, indices)
 
@@ -107,6 +111,7 @@ def build_negative_dataset(disease, loc, indices, output_file_name, positive_gen
     df = pandas.DataFrame(file)
     reported_genes = df["REPORTED GENE(S)"] # df[df.columns[13]]
     reported_genes = reported_genes[indices].values
+    mapped_genes = df["MAPPED_GENE"].values
 
     with open(output_file_name, "a") as out_file:
         counter = 0
@@ -123,7 +128,10 @@ def build_negative_dataset(disease, loc, indices, output_file_name, positive_gen
                 # Example code
                 features_to_add = ""
                 features_to_add += gene_ontology_features.add_feature_for_curr_snp(disease, reported_genes[i])
-                features_to_add += "" + gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, reported_genes[i])
+                if disease == "cardiovascular_disease":
+                    features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, mapped_genes[i])
+                else:
+                    features_to_add += gene_tissue_expression.add_tissue_expression_for_curr_snp(disease, reported_genes[i])
             except ValueError:
                 continue
 
@@ -156,7 +164,7 @@ def create_dataset(disease, train_size=0, test_size=0, val_size=0):
 
 
 def main():
-    disease = "cardiovascular_disease"
+    disease = "cardiovascular_disease"  # Change this depending on what disease you are analyzing
     create_dataset(disease)
 
 

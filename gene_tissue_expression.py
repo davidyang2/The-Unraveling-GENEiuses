@@ -3,8 +3,15 @@ import os
 import sys
 
 
-def add_to_header():
-    return "TISSUE_EXPRESSION LEVEL\t"
+def add_to_header(disease):
+    if disease == "breast_carcinoma":
+        return "BREAST_A_LEVEL\tBREAST_G_LEVEL\tBREAST_M_LEVEL\t"
+
+    if disease == "cardiovascular_disease":
+        return "HEART_EXPRESSION_LEVEL\t"
+
+    if disease == "diabetes":
+        return "PANCREAS_EG_LEVEL\tPANCREAS_IOL_LEVEL\tKIDNEY_CG_LEVEL\tKIDNEY_T_LEVEL\t"
 
 def enumerate_feature(feature_list, feature_option_num):
     feature_options = set(feature_list)
@@ -27,54 +34,72 @@ def add_tissue_expression_for_curr_snp(disease, curr_gene):
     gene_names = df["Gene name"]
 
     if curr_gene == "Intergenic" or curr_gene == "intergenic":  # Expression level is unknown for Intergenic SNPs due to lack of mapping from GWAS to Human Protein Atlas
-        return "-2\t"
+        if disease == "diabetes":
+            return "-2\t-2\t-2\t-2\t"
+        if disease == "breast_carcinoma":
+            return "-2\t-2\t-2\t"
+        else:
+            return "-2\t"
     else:  # SNP is located in a gene
         if curr_gene in gene_names.values:
             express_range = df.loc[df["Gene name"] == curr_gene]
 
             if disease == "breast_carcinoma":
-                express_range = express_range.loc[express_range["Tissue"] == "breast"]
+                # express_range = express_range.loc[express_range["Tissue"] == "breast"]
 
-                if "High" in express_range["Level"].values:
-                    return expression_dict["High"] + "\t"
-                elif "Medium" in express_range["Level"].values:
-                    return expression_dict["Medium"] + "\t"
-                elif "Low" in express_range["Level"].values:
-                    return expression_dict["Low"] + "\t"
-                elif "Not detected" in express_range["Level"].values:
-                    return expression_dict["Not detected"] + "\t"
-                else:
-                    return "-1\t"
+                print(curr_gene)
+                expression_result = ""
+                genes = list(df["Gene name"].values)
+                tissues = list(df["Tissue"].values)
+                level = list(df["Level"].values)
+                for i in range(len(tissues)):
+                    if genes[i] == curr_gene and tissues[i] == "breast":
+                        expression_result += expression_dict[level[i]] + "\t"
+
+                if expression_result == "":
+                    return "-1\t-1\t-1\t"
+                return expression_result
 
             if disease == "diabetes":
-                express_range = express_range.loc[express_range["Tissue"] == "pancreas"]
+                # express_range_pancreas = express_range.loc[express_range["Tissue"] == "pancreas"]
+                # express_range_kidney = express_range.loc[express_range["Tissue"] == "kidney"]
 
-                if "High" in express_range["Level"].values:
-                    return expression_dict["High"] + "\t"
-                elif "Medium" in express_range["Level"].values:
-                    return expression_dict["Medium"] + "\t"
-                elif "Low" in express_range["Level"].values:
-                    return expression_dict["Low"] + "\t"
-                elif "Not detected" in express_range["Level"].values:
-                    return expression_dict["Not detected"] + "\t"
-                else:
-                    return "-1\t"
+                expression_result = ""
+                # print(curr_gene)
+
+                genes = list(df["Gene name"].values)
+                tissues = list(df["Tissue"].values)
+                level = list(df["Level"].values)
+                for i in range(len(tissues)):
+                    if genes[i] == curr_gene and tissues[i] == "pancreas":
+                        expression_result += expression_dict[level[i]] + "\t"
+                for i in range(len(tissues)):
+                    if genes[i] == curr_gene and tissues[i] == "kidney":
+                        expression_result += expression_dict[level[i]] + "\t"
+
+                if expression_result == "":
+                    return "-1\t-1\t-1\t-1\t"
+                return expression_result
 
             if disease == "cardiovascular_disease":
-                express_range = express_range.loc[express_range["Tissue"] == "heart muscle"]
+                # express_range = express_range.loc[express_range["Tissue"] == "heart muscle"]
+                expression_result = ""
+                genes = list(df["Gene name"].values)
+                tissues = list(df["Tissue"].values)
+                level = list(df["Level"].values)
+                for i in range(len(tissues)):
+                    if genes[i] == curr_gene and tissues[i] == "heart muscle":
+                        expression_result += expression_dict[level[i]] + "\t"
 
-                if "High" in express_range["Level"].values:
-                    return expression_dict["High"] + "\t"
-                elif "Medium" in express_range["Level"].values:
-                    return expression_dict["Medium"] + "\t"
-                elif "Low" in express_range["Level"].values:
-                    return expression_dict["Low"] + "\t"
-                elif "Not detected" in express_range["Level"].values:
-                    return expression_dict["Not detected"] + "\t"
-                else:
+                if expression_result == "":
                     return "-1\t"
+                return expression_result
 
         else:  # Expression is not found at all
+            if disease == "diabetes":
+                return "-1\t-1\t-1\t-1\t"
+            if disease == "breast_carcinoma":
+                return "-1\t-1\t-1\t"
             return "-1\t"
 
 def cleanup_single_gene(org_gene):
